@@ -10,31 +10,35 @@ Sistema distribuído de monitoramento e controle de um reservatório residencial
 
 ```
 Caixa Água  ──ESP-NOW──▶  Caixa Bomba  ──ESP-NOW──▶  Caixa Controle  ──Wi-Fi──▶  Supabase
-(nível)                   (relé + PZEM)               (LED, dashboard,           (telemetria)
-                                                        servidor web)
+(nível)                        │                      (LED, dashboard,           (telemetria)
+                                │ cabo (força)              servidor web)
+                                ▼
+                           Caixa WEG
+                    (disjuntor, DR, contator,
+                      relés, medidor de energia)
 ```
 
-Três placas fisicamente separadas, cada uma com sua própria lógica de segurança local — se uma cair, as outras continuam operando com o último dado válido conhecido (nunca "travado" silenciosamente: cada caixa detecta o silêncio da outra e sinaliza isso explicitamente, em vez de assumir que o último dado ainda é atual).
+Quatro gabinetes fisicamente separados. Três têm ESP32 e trocam dados por rádio; o
+quarto (WEG) é só o painel de força, sem microcontrolador — nenhuma tensão de rede
+entra em nenhuma caixa eletrônica. Cada caixa com ESP32 tem sua própria lógica de
+segurança local — se uma cair, as outras continuam operando com o último dado válido
+conhecido (nunca "travado" silenciosamente: cada caixa detecta o silêncio da outra e
+sinaliza isso explicitamente, em vez de assumir que o último dado ainda é atual).
 
-| Caixa | Função | ESP32 |
+| Caixa | Função | Hardware principal |
 |---|---|---|
-| Água | Mede o nível do reservatório (ultrassônico) | DevKit V1 |
-| Bomba | Liga/desliga a bomba, mede corrente/tensão (PZEM-004T), roda auto-teste de segurança | DevKit V1 |
-| Controle | Concentra telemetria, sinaliza erro (LED), serve dashboard local e envia dados ao Supabase | DevKit V1 |
+| Água | Mede o nível do reservatório (ultrassônico) | ESP32 DevKit V1302 |
+| Bomba | Liga/desliga a bomba, lê o medidor de energia, roda auto-teste de segurança | ESP32 DevKit V1302 — só eletrônica, nenhum componente de força |
+| WEG | Painel de força: disjuntor, DR, contator, relés, medidor de energia | Sem microcontrolador — ligada à Bomba por cabo |
+| Controle | Concentra telemetria, sinaliza erro (LED), serve dashboard local, envia dados ao Supabase | ESP32 30 pinos |
 
-Um M5Stack Cardputer atua como console remoto — hoje seu papel é específico: colocar qualquer uma das três caixas em modo OTA ou abrir o servidor web da Controle, via ESP-NOW.
-
-## Hardware por caixa
-
-**Caixa Água:** sensor ultrassônico AJ-SR04M-2, sensor capacitivo XKC-Y26S-V (transbordo/"ladrão").
-
-**Caixa Bomba:** 2× relé SRD-05VDC-SL-C em série na bobina do contator (redundância — os dois precisam fechar pra energizar, qualquer um abrindo desenergiza), medidor de energia PZEM-004T v4.0 (Modbus RTU sobre UART).
-
-**Caixa Controle:** sinaleira (semáforo R/Y/G), LED de erro dedicado, buzzer, botões físicos, servidor web local (fallback sem depender do dashboard remoto).
+Um M5Stack Cardputer atua como console remoto — hoje seu papel é específico: colocar
+qualquer uma das três caixas com ESP32 em modo OTA ou abrir o servidor web da
+Controle, via ESP-NOW.
 
 ## Destaques de engenharia
 
-- **Auto-teste de relé colado:** após todo desligamento, a Bomba isola cada relé individualmente e confere via PZEM se a potência cai a ~0 — se não cair, sinaliza falha sem bloquear a operação normal (o defeito físico continua existindo até troca de placa; o firmware só garante que ele não fica invisível).
+- **Auto-teste de relé colado:** após todo desligamento, a Bomba isola cada relé individualmente e confere via medidor de energia se a potência cai a ~0 — se não cair, sinaliza falha sem bloquear a operação normal (o defeito físico continua existindo até troca de placa; o firmware só garante que ele não fica invisível).
 - **Redundância de sensores:** além da medição contínua por ultrassônico, sensores de ponto único confirmam os extremos (nível máximo e mínimo do reservatório, e o cano de transbordo) — cobrindo o cenário em que o sensor principal trava numa leitura falsa.
 - **Revisão externa antes de campo:** as mudanças de segurança passaram por revisão crítica antes do primeiro flash — incluindo um risco físico real (colagem simultânea dos dois relés durante o próprio teste) que só apareceu nessa revisão, documentado abaixo em vez de escondido.
 
@@ -43,12 +47,21 @@ Um M5Stack Cardputer atua como console remoto — hoje seu papel é específico:
 Este projeto está em desenvolvimento ativo — nem todas as caixas estão no mesmo nível de maturidade:
 
 - **Caixa Bomba e Caixa Controle:** redundância de relé, auto-teste de segurança e sinalização de erro unificada implementados e revisados. Aguardando flash em campo.
-- **Caixa Água:** ainda **sem** a mesma redundância de hardware que a Bomba recebeu, e sem mitigação de condensação instalada no sensor ultrassônico (hipótese de causa raiz documentada internamente; capacitores recomendados, ainda não confirmados fisicamente instalados). Um incidente de sensor travado por condensação já ocorreu em campo — a mitigação de hardware é o próximo passo real para essa caixa, não uma formalidade.
+- **Caixa Água:** ainda **sem** a mesma redundância de hardware que a Bomba recebeu, e sem mitigação de condensação instalada no sensor ultrassônico (hipótese de causa raiz documentada internamente; componentes para o aquecimento resistivo já adquiridos, ainda não instalados fisicamente). Um incidente de sensor travado por condensação já ocorreu em campo — a mitigação de hardware é o próximo passo real para essa caixa, não uma formalidade.
 - **Sensores redundantes de nível:** decisão de arquitetura fechada, aquisição/instalação física ainda pendente.
 
 Se algo aqui parece incompleto, é porque está — a intenção é documentar o processo real de engenharia, não um produto acabado.
 
-## Configuração
+## Documentação técnica
+
+Detalhes que não cabem num README enxuto vivem em `docs/`:
+
+- [`docs/HARDWARE.md`](docs/HARDWARE.md) — lista completa de componentes, por caixa, com modelo exato
+- [`docs/PINOUT.md`](docs/PINOUT.md) — mapa de pinos GPIO
+- [`docs/PROTOCOL.md`](docs/PROTOCOL.md) — protocolo ESP-NOW compartilhado entre as caixas
+- [`docs/BUILD.md`](docs/BUILD.md) — toolchain, bibliotecas e passo a passo de flash
+
+## Configuração rápida
 
 Este repositório **não contém nenhuma credencial**. Antes de compilar:
 
@@ -58,7 +71,7 @@ cp secrets.h.example secrets.h
 
 Preencha `secrets.h` com sua rede Wi-Fi e (opcionalmente) seu projeto Supabase — o firmware detecta automaticamente se o Supabase não foi configurado e desativa o envio de telemetria sem precisar comentar código. `secrets.h` já está no `.gitignore`.
 
-Ajuste também os MACs das placas (`marica_protocol.h`) e os IPs da sua rede local — os valores no repositório são placeholders.
+Passo a passo completo (MACs, IPs, ordem de flash) em [`docs/BUILD.md`](docs/BUILD.md).
 
 ## Estrutura
 
@@ -69,6 +82,11 @@ main_controle.cpp       — firmware da Caixa Controle
 marica_protocol.h       — protocolo compartilhado (structs, enums, MACs — compartilhado pelas 3 caixas)
 secrets.h.example       — template de credenciais (copie para secrets.h)
 .gitignore
+docs/
+  HARDWARE.md           — componentes por caixa
+  PINOUT.md             — mapa de pinos GPIO
+  PROTOCOL.md           — protocolo compartilhado
+  BUILD.md              — compilação e flash
 ```
 
 ## Licença
