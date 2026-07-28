@@ -39,7 +39,7 @@
 | 14 | Botão 1 — clique curto liga a bomba, hold 3s abre o servidor web local |
 | 12 | Botão 2 — parada de emergência |
 
-## Pendente (arquitetura decidida, ainda não implementada no firmware)
+## Pendente (Caixa Água — arquitetura decidida, ainda não implementada no firmware)
 
 - 2ª unidade **XKC-Y25-V** (nível mínimo), somada à 1ª já em posse (nível máximo) —
   redundância de nível por sensor de ponto único. Sem GPIO definido no código ainda:
