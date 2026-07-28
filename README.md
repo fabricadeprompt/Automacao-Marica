@@ -1,6 +1,6 @@
 # Automação Maricá
 
-Sistema distribuído de monitoramento e controle de um reservatório residencial (caixa d'água + bomba de recirculação), construído com 3 ESP32 se comunicando via ESP-NOW.
+Sistema automatizado e distribuído de monitoramento e controle de um reservatório residencial (caixa d'água + bomba de recirculação), construído com 3 microcontroladores ESP32 se comunicando via ESP-NOW.
 
 **Dashboard ao vivo:** https://fabricadeprompt.github.io/Marica-Dashboard/
 
@@ -13,28 +13,32 @@ Caixa Água  ──ESP-NOW──▶  Caixa Bomba  ──ESP-NOW──▶  Caixa 
 (nível)                        │                      (LED, dashboard,           (telemetria)
                                 │ cabo (força)              servidor web)
                                 ▼
-                           Caixa WEG
+                         Caixa Elétrica
                     (disjuntor, DR, contator,
                       relés, medidor de energia)
 ```
 
-Quatro gabinetes fisicamente separados. Três têm ESP32 e trocam dados por rádio; o
-quarto (WEG) é só o painel de força, sem microcontrolador — nenhuma tensão de rede
-entra em nenhuma caixa eletrônica. Cada caixa com ESP32 tem sua própria lógica de
-segurança local — se uma cair, as outras continuam operando com o último dado válido
-conhecido (nunca "travado" silenciosamente: cada caixa detecta o silêncio da outra e
-sinaliza isso explicitamente, em vez de assumir que o último dado ainda é atual).
+Quatro gabinetes fisicamente separados: caixa água, caixa bomba, caixa controle e
+caixa elétrica. Três destas caixas possuem microcontroladores ESP32 e trocam dados por
+rádio (ESP-Now); a caixa elétrica é um painel de força, ligada à caixa bomba por dois
+cabos de 6 vias cada — nenhuma tensão de rede entra em nenhuma caixa eletrônica. Cada
+caixa com ESP32 tem sua própria lógica de segurança local — se uma cair, as outras
+continuam operando com dados válidos (nunca "travado" silenciosamente: cada caixa
+detecta o silêncio da outra e sinaliza isso explicitamente, em vez de assumir que o
+último dado ainda é atual).
 
 | Caixa | Função | Hardware principal |
 |---|---|---|
 | Água | Mede o nível do reservatório (ultrassônico) | ESP32 DevKit V1302 |
 | Bomba | Liga/desliga a bomba, lê o medidor de energia, roda auto-teste de segurança | ESP32 DevKit V1302 — só eletrônica, nenhum componente de força |
-| WEG | Painel de força: disjuntor, DR, contator, relés, medidor de energia | Sem microcontrolador — ligada à Bomba por cabo |
+| Elétrica | Painel de força: disjuntor, DR, contator, relés, medidor de energia | Sem microcontrolador — ligada à Bomba por 2 cabos de 6 vias |
 | Controle | Concentra telemetria, sinaliza erro (LED), serve dashboard local, envia dados ao Supabase | ESP32 30 pinos |
 
 Um M5Stack Cardputer atua como console remoto — hoje seu papel é específico: colocar
 qualquer uma das três caixas com ESP32 em modo OTA ou abrir o servidor web da
-Controle, via ESP-NOW.
+Controle, via ESP-NOW. Está planejado (ainda não implementado) que ele também funcione
+como monitor gráfico do nível da Caixa Água, fixado por ímã próprio na porta da
+geladeira.
 
 ## Destaques de engenharia
 
