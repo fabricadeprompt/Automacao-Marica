@@ -1,9 +1,0 @@
-# Credenciais reais -- nunca commitar. Use secrets.h.example como base.
-secrets.h
-
-# Artefatos comuns de build Arduino/PlatformIO
-.pio/
-.vscode/
-build/
-*.bin
-*.elf
