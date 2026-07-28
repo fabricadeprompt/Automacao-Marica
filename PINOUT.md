@@ -13,12 +13,17 @@
 
 ## Caixa Bomba (`main_bomba.cpp`)
 
+> A Caixa Bomba contém só o ESP32 -- nenhum componente de força. Os dispositivos que
+> estes pinos controlam (placa de relé, PZEM-004T) ficam fisicamente na **Caixa WEG**,
+> conectados por dois cabos manga (ver `docs/HARDWARE.md`). Os pinos abaixo são do
+> ESP32 da Bomba; a outra ponta de cada um está do outro lado do cabo.
+
 | GPIO | Função | Detalhe elétrico |
 |---|---|---|
-| 18 | `GPIO_K1` — relé K1 (novo) | Dual-relay em série com K2 na bobina do contator — os dois precisam fechar para energizar a bomba |
-| 19 | `GPIO_K2` — relé K2 (existente) | Em série com K1 — qualquer um dos dois abrindo desenergiza a bomba |
-| 16 | `GPIO_PZEM_RX` — RX do ESP32, recebe TX do PZEM-004T | Divisor de tensão R1=10kΩ + R2=20kΩ (5V→3,33V) |
-| 17 | `GPIO_PZEM_TX` — TX do ESP32, envia para RX do PZEM-004T | Ligação direta, sem divisor (RX do PZEM já tolera 3,3V) |
+| 18 | `GPIO_K1` — controla o relé K1 (placa de relé duplo, na Caixa WEG) | Dual-relay em série com K2 na bobina do contator — os dois precisam fechar para energizar a bomba |
+| 19 | `GPIO_K2` — controla o relé K2 (existente, mesma placa) | Em série com K1 — qualquer um dos dois abrindo desenergiza a bomba |
+| 16 | `GPIO_PZEM_RX` — RX do ESP32, recebe TX do PZEM-004T (na Caixa WEG) | Divisor de tensão R1=10kΩ + R2=20kΩ (5V→3,33V) |
+| 17 | `GPIO_PZEM_TX` — TX do ESP32, envia para RX do PZEM-004T (Caixa WEG) | Ligação direta, sem divisor (RX do PZEM já tolera 3,3V) |
 
 ## Caixa Controle (`main_controle.cpp`)
 
