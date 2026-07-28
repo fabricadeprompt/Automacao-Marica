@@ -4,7 +4,7 @@
 > adquiridos mas ainda não instalados aparecem em [Planejado](#planejado-não-instalado),
 > separados do restante -- mesma política de honestidade do README.
 
-## Caixa WEG (painel de força)
+## Caixa Elétrica (painel de força)
 
 Único gabinete do sistema que toca tensão de rede. Nenhuma alta tensão entra em
 nenhuma caixa com microcontrolador.
@@ -28,7 +28,7 @@ Só eletrônica de baixo nível -- nenhum componente de força.
 | ESP32 | DevKit V1302, 38 pinos, antena externa |
 | Adaptador | Kit de expansão com terminais parafusados (substitui conectores Dupont diretos) |
 
-### Interligação Caixa WEG ↔ Caixa Bomba
+### Interligação Caixa Elétrica ↔ Caixa Bomba
 
 Dois cabos manga de 6 vias interligam as duas caixas:
 
@@ -37,7 +37,7 @@ Dois cabos manga de 6 vias interligam as duas caixas:
 | Cabo 1 | 6 de 6 | 5V, GND, PZEM TX, PZEM RX, K1 (GPIO18), K2 (GPIO19) |
 | Cabo 2 | 1 de 6 | 3,3V lógico (ESP32 → VCC da placa de relé) -- usa o GND do Cabo 1 como referência, sem retorno dedicado próprio |
 
-GND é uma única referência comum: termina no terra da fonte (WEG), distribuído ali
+GND é uma única referência comum: termina no terra da fonte (Caixa Elétrica), distribuído ali
 localmente para o GND do PZEM e da placa de relé, e estende pelo cabo até o pino GND
 do ESP32 (Bomba).
 
