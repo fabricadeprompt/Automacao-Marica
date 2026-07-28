@@ -42,9 +42,8 @@ geladeira.
 
 ## Destaques de engenharia
 
-- **Auto-teste de relé colado:** após todo desligamento, a Bomba isola cada relé individualmente e confere via medidor de energia se a potência cai a ~0 — se não cair, sinaliza falha sem bloquear a operação normal (o defeito físico continua existindo até troca de placa; o firmware só garante que ele não fica invisível).
-- **Redundância de sensores:** além da medição contínua por ultrassônico, sensores de ponto único confirmam os extremos (nível máximo e mínimo do reservatório, e o cano de transbordo) — cobrindo o cenário em que o sensor principal trava numa leitura falsa.
-- **Revisão externa antes de campo:** as mudanças de segurança passaram por revisão crítica antes do primeiro flash — incluindo um risco físico real (colagem simultânea dos dois relés durante o próprio teste) que só apareceu nessa revisão, documentado abaixo em vez de escondido.
+- **Auto-teste de relé colado:** após cada desligamento da bomba hidráulica, o microcontrolador da Caixa Bomba isola cada relé individualmente e confere, via medidor de energia, se a potência cai a ~0 — se não cair, sinaliza falha na placa de relés, porém, sem bloquear a operação normal (o defeito físico continua existindo até troca de placa; o firmware garante que o defeito não fique invisível).
+- **Revisão externa antes de campo:** para cada mudança no firmware, duas IAs foram utilizadas para validar as mudanças.
 
 ## Estado atual / limitações conhecidas
 
