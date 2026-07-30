@@ -34,11 +34,11 @@ detecta o silêncio da outra e sinaliza isso explicitamente, em vez de assumir q
 | Elétrica | Painel de força: disjuntor, DR, contator, relés, medidor de energia | Sem microcontrolador — ligada à Bomba por 2 cabos de 6 vias |
 | Controle | Concentra telemetria, sinaliza erro (LED), serve dashboard local, envia dados ao Supabase | ESP32 30 pinos |
 
-Um M5Stack Cardputer atua como console remoto — hoje seu papel é específico: colocar
+Um M5Stack Cardputer atua como console remoto: colocar
 qualquer uma das três caixas com ESP32 em modo OTA ou abrir o servidor web da
-Controle, via ESP-NOW. Está planejado (ainda não implementado) que ele também funcione
-como monitor gráfico do nível da Caixa Água, fixado por ímã próprio na porta da
-geladeira.
+Controle, via ESP-NOW. Além disso, ele também funciona
+como monitor gráfico do nível da Caixa Água, podendo ser fixado, por exemplo, na porta da
+geladeira através do imã do próprio M5Stack Cardputer.
 
 ## Destaques de engenharia
 
